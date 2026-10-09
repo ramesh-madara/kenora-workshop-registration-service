@@ -34,9 +34,14 @@ export async function getSession() {
   await connection();
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
+  
+  console.log("[getSession] Read raw cookie from header:", sessionCookie);
+  
   if (!sessionCookie) return null;
   
-  return await decrypt(sessionCookie);
+  const decrypted = await decrypt(sessionCookie);
+  console.log("[getSession] Decrypted payload:", decrypted);
+  return decrypted;
 }
 
 export async function destroySession() {

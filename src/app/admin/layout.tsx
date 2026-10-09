@@ -12,8 +12,11 @@ export default async function AdminLayout({
 }>) {
   await connection();
   const session = await getSession();
+  
+  console.log("[AdminLayout] Evaluated session:", session);
 
   if (!session || session.role !== "admin") {
+    console.log("[AdminLayout] Redirecting to /login because session is invalid or not admin.");
     redirect("/login");
   }
 
