@@ -33,9 +33,9 @@ export default async function AdminLayout({
                 Super {session.role}
               </span>
               <span className="text-sm text-gray-500 hidden sm:block">{session.email}</span>
-              <Link href="/logout" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="/logout" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
                 Logout
-              </Link>
+              </a>
             </div>
           </div>
         </div>
