@@ -33,7 +33,7 @@ export async function createSession(user: { id: number; email: string; role: str
 export async function getSession() {
   await connection();
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+  const sessionCookie = cookieStore.get("session_token")?.value;
   
   console.log("[getSession] Read raw cookie from header:", sessionCookie);
   
@@ -46,5 +46,5 @@ export async function getSession() {
 
 export async function destroySession() {
   const cookieStore = await cookies();
-  cookieStore.delete("session");
+  cookieStore.delete("session_token");
 }
