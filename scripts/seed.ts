@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Pool } from 'pg';
-import bcrypt from 'bcryptjs';
+
 
 // Automatically load .env.local or .env if present
 const envFiles = ['.env.local', '.env'];
@@ -38,20 +38,17 @@ export async function seedAdminUser(customPool?: Pool) {
     ];
 
     for (const u of usersToSeed) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(u.plainPassword, salt);
-
       const query = `
-        INSERT INTO users (email, password_hash, role)
+        INSERT INTO users (email, password, role)
         VALUES ($1, $2, $3)
         ON CONFLICT (email) 
         DO UPDATE SET 
-          password_hash = EXCLUDED.password_hash,
+          password = EXCLUDED.password,
           role = EXCLUDED.role
         RETURNING id, email, role, created_at;
       `;
 
-      const res = await pool.query(query, [u.username, passwordHash, u.role]);
+      const res = await pool.query(query, [u.username, u.plainPassword, u.role]);
       console.log(`[Seed] Successfully seeded user:`, {
         id: res.rows[0].id,
         username: res.rows[0].email,
