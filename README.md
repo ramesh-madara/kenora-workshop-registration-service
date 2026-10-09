@@ -2,6 +2,7 @@
 
 > ## 🌐 LIVE DEMO
 > # 👉 [https://kenora-workshop-registration-service-9h52n0mkd.vercel.app/](https://kenora-workshop-registration-service-9h52n0mkd.vercel.app/)
+> ### 📄 <a href="https://github.com/ramesh-madara/kenora-workshop-registration-service/blob/main/Docs/Documentation.pdf" target="_blank">View Architecture & Concurrency Documentation (PDF)</a>
 > ### Test Accounts — Password for all: `pw123`
 > | Role | Username |
 > |------|----------|
