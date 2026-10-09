@@ -6,6 +6,8 @@ import { connection } from "next/server";
 import RegistrationForm from "./RegistrationForm";
 import CancelButton from "./CancelButton";
 
+export const instant = false;
+
 export default async function WorkshopDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const session = await getSession();
@@ -117,96 +119,104 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
           </div>
         </div>
 
-        <RegistrationForm workshopId={workshopId} isFull={isFull} />
+        <div className="mt-8 flex flex-col lg:flex-row gap-8 items-start">
+          
+          <div className="w-full lg:w-1/3 sticky top-24">
+            <RegistrationForm workshopId={workshopId} isFull={isFull} />
+          </div>
 
-        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Active Attendees Roster</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-white">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked By</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked Date</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {roster.map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{r.attendee_name}</div>
-                      <div className="text-sm text-gray-500">{r.attendee_email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {r.booked_by_email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(r.created_at).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <CancelButton registrationId={r.id} workshopId={workshopId} />
-                    </td>
-                  </tr>
-                ))}
-                {roster.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                      No attendees registered yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <div className="w-full lg:w-2/3 space-y-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">Active Attendees Roster</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-white">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked By</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked Date</th>
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {roster.map((r) => (
+                      <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{r.attendee_name}</div>
+                          <div className="text-sm text-gray-500">{r.attendee_email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {r.booked_by_email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(r.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <CancelButton registrationId={r.id} workshopId={workshopId} />
+                        </td>
+                      </tr>
+                    ))}
+                    {roster.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
+                          No attendees registered yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Immutable Audit Trail</h3>
-            <p className="mt-1 text-sm text-gray-500">Chronological timeline of all operations on this workshop.</p>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">Immutable Audit Trail</h3>
+                <p className="mt-1 text-sm text-gray-500">Chronological timeline of all operations on this workshop.</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-white">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performed By</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {auditLog.map((log) => (
+                      <tr key={log.id} className={`${log.action === 'cancelled' ? 'bg-red-50' : 'bg-white'}`}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(log.action_timestamp).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${log.action === 'registered' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 capitalize'}`}>
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${log.action === 'cancelled' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                          {log.attendee_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {log.performed_by_email} <span className="text-gray-400">({log.performed_by_role})</span>
+                        </td>
+                      </tr>
+                    ))}
+                    {auditLog.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
+                          No audit history available.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-white">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performed By</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {auditLog.map((log) => (
-                  <tr key={log.id} className={`${log.action === 'cancelled' ? 'bg-red-50' : 'bg-white'}`}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(log.action_timestamp).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${log.action === 'registered' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 capitalize'}`}>
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${log.action === 'cancelled' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                      {log.attendee_name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.performed_by_email} <span className="text-gray-400">({log.performed_by_role})</span>
-                    </td>
-                  </tr>
-                ))}
-                {auditLog.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                      No audit history available.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          
         </div>
 
       </main>

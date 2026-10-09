@@ -4,6 +4,8 @@ import { query } from "@/lib/db";
 import Link from "next/link";
 import { connection } from "next/server";
 
+export const instant = false;
+
 export default async function DashboardPage() {
   await connection();
   const session = await getSession();
