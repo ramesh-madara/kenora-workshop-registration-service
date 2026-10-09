@@ -1,5 +1,17 @@
 # Workshop Registration Service
 
+> ## 🌐 LIVE DEMO
+> # 👉 [https://kenora-workshop-registration-servic.vercel.app/](https://kenora-workshop-registration-servic.vercel.app/)
+> ### Test Accounts — Password for all: `pw123`
+> | Role | Username |
+> |------|----------|
+> | **Admin** | `admin` |
+> | **Manager** | `manager` |
+> | **Staff** | `staff` |
+
+---
+
+
 A full-stack, internal staff-facing web application for managing community training centre workshops and attendee registrations. Built with Next.js, Tailwind CSS, and Neon Serverless PostgreSQL.
 
 ## 🚀 Setup Instructions
