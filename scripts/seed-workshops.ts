@@ -59,6 +59,7 @@ export async function seedWorkshops(customPool?: Pool) {
     const insertQuery = `
       INSERT INTO workshops (type_id, code, title, instructor, schedule_date, duration, capacity, status, location)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id
     `;
 
     for (let i = 0; i < 15; i++) {
@@ -75,7 +76,7 @@ export async function seedWorkshops(customPool?: Pool) {
       const status = 'published';
       const location = locations[i % 3];
 
-      await pool.query(insertQuery, [
+      const res = await pool.query(insertQuery, [
         typeId,
         code,
         title,
@@ -86,9 +87,36 @@ export async function seedWorkshops(customPool?: Pool) {
         status,
         location
       ]);
+
+      const workshopId = res.rows[0].id;
+      
+      // Seed some registrations for the first 5 workshops
+      if (i < 5) {
+        // Let's create enough registrations to fill it, plus some for the waitlist on the first 2
+        const numToRegister = i < 2 ? capacity + 5 : Math.floor(capacity / 2);
+        
+        for (let j = 0; j < numToRegister; j++) {
+          const status = j < capacity ? 'active' : 'waitlisted';
+          const attendeeName = `Test User ${i}-${j}`;
+          const attendeeEmail = `user${i}_${j}@example.com`;
+          
+          const regRes = await pool.query(
+            "INSERT INTO registrations (workshop_id, attendee_name, attendee_email, status) VALUES ($1, $2, $3, $4) RETURNING id",
+            [workshopId, attendeeName, attendeeEmail, status]
+          );
+          
+          const regId = regRes.rows[0].id;
+          
+          // Seed audit trail
+          await pool.query(
+            "INSERT INTO registration_history (registration_id, action, performed_by) VALUES ($1, $2, (SELECT id FROM users WHERE role = 'manager' LIMIT 1))",
+            [regId, status === 'waitlisted' ? 'waitlisted' : 'registered']
+          );
+        }
+      }
     }
     
-    console.log('Successfully seeded 15 varied workshops.');
+    console.log('Successfully seeded 15 varied workshops and populated registrations for the first 5.');
   } catch (error) {
     console.error('Error seeding workshops:', error);
     throw error;

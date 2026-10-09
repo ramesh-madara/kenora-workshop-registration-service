@@ -98,7 +98,6 @@ export async function deleteUser(id: number) {
     throw new Error("Failed to delete user. They may have related records.");
   }
 }
-}
 
 export async function toggleUserStatus(id: number, isActive: boolean) {
   const session = await getSession();
@@ -106,7 +105,7 @@ export async function toggleUserStatus(id: number, isActive: boolean) {
     throw new Error("Unauthorized");
   }
 
-  // Prevent admin from deactivating themselves
+
   if (session.id === id) {
     throw new Error("Cannot deactivate your own account.");
   }
@@ -119,3 +118,4 @@ export async function toggleUserStatus(id: number, isActive: boolean) {
     console.error(err);
     throw new Error("Failed to update user status.");
   }
+}

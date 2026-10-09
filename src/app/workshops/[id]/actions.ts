@@ -20,7 +20,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
 
   try {
     const status = await withTransaction(async (client) => {
-      // 1. Lock the workshop row to prevent concurrent overbooking
+
       const wsRes = await client.query(
         "SELECT capacity FROM workshops WHERE id = $1 FOR UPDATE",
         [workshopId]
@@ -32,7 +32,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
       
       const capacity = wsRes.rows[0].capacity;
 
-      // 2. Count active registrations
+
       const countRes = await client.query(
         "SELECT COUNT(*) as count FROM registrations WHERE workshop_id = $1 AND status = 'active'",
         [workshopId]
@@ -43,7 +43,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
       const newStatus = isFull ? 'waitlisted' : 'active';
       const actionType = isFull ? 'waitlisted' : 'registered';
 
-      // 3. Insert Registration
+
       const regRes = await client.query(
         "INSERT INTO registrations (workshop_id, attendee_name, attendee_email, status) VALUES ($1, $2, $3, $4) RETURNING id",
         [workshopId, name, email, newStatus]
@@ -51,7 +51,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
       
       const registrationId = regRes.rows[0].id;
 
-      // 4. Insert Audit Log
+
       await client.query(
         "INSERT INTO registration_history (registration_id, action, performed_by) VALUES ($1, $2, $3)",
         [registrationId, actionType, session.id]
@@ -75,10 +75,10 @@ export async function cancelRegistration(registrationId: number, workshopId: num
 
   try {
     await withTransaction(async (client) => {
-      // 0. Lock the workshop to prevent race conditions during waitlist promotion
+
       await client.query("SELECT id FROM workshops WHERE id = $1 FOR UPDATE", [workshopId]);
 
-      // 1. Update Registration Status
+
       const regRes = await client.query(
         "UPDATE registrations SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'active' RETURNING id",
         [registrationId]
@@ -88,13 +88,13 @@ export async function cancelRegistration(registrationId: number, workshopId: num
         throw new Error("Registration not found or already cancelled.");
       }
 
-      // 2. Insert Audit Log
+
       await client.query(
         "INSERT INTO registration_history (registration_id, action, performed_by) VALUES ($1, 'cancelled', $2)",
         [registrationId, session.id]
       );
 
-      // 3. Promote next from waitlist
+
       const waitlistRes = await client.query(
         "SELECT id, attendee_name FROM registrations WHERE workshop_id = $1 AND status = 'waitlisted' ORDER BY created_at ASC LIMIT 1 FOR UPDATE",
         [workshopId]

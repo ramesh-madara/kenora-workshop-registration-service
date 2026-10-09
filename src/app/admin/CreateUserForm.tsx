@@ -5,15 +5,15 @@ import { createUser } from "./actions";
 
 export default function CreateUserForm() {
   const [state, formAction, isPending] = useActionState(createUser, {
-    error: null,
-    success: null,
-  });
+    error: "",
+    success: "",
+  } as any);
   
   const formRef = useRef<HTMLFormElement>(null);
 
   if (state.success && formRef.current) {
     formRef.current.reset();
-    state.success = null;
+    state.success = "";
   }
 
   return (

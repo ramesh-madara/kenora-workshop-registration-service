@@ -15,7 +15,7 @@ export default function AuditModal({
   const attendeeDialogRef = useRef<HTMLDialogElement>(null);
   const workshopDialogRef = useRef<HTMLDialogElement>(null);
 
-  // Attendee Modal Effect
+
   useEffect(() => {
     const dialog = attendeeDialogRef.current;
     if (!dialog) return;
@@ -23,7 +23,7 @@ export default function AuditModal({
     else dialog.close();
   }, [isAttendeeOpen]);
 
-  // Workshop Modal Effect
+
   useEffect(() => {
     const dialog = workshopDialogRef.current;
     if (!dialog) return;
@@ -44,7 +44,7 @@ export default function AuditModal({
 
   return (
     <div className="flex gap-2">
-      {/* Attendee Audit Button */}
+
       <button 
         onClick={() => setIsAttendeeOpen(true)}
         className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
@@ -52,7 +52,7 @@ export default function AuditModal({
         Registration Audit
       </button>
 
-      {/* Workshop Audit Button */}
+
       <button 
         onClick={() => setIsWorkshopOpen(true)}
         className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
@@ -60,7 +60,7 @@ export default function AuditModal({
         Workshop Audit
       </button>
 
-      {/* Attendee Modal */}
+
       <dialog 
         ref={attendeeDialogRef} 
         onClick={(e) => { if (e.target === attendeeDialogRef.current) setIsAttendeeOpen(false) }}
@@ -101,7 +101,7 @@ export default function AuditModal({
                         log.action === 'registered' || log.action === 'promoted' 
                           ? 'bg-green-100 text-green-800' 
                           : log.action === 'waitlisted' 
-                          ? 'bg-yellow-100 text-yellow-800' 
+                          ? 'bg-gray-100 text-gray-800' 
                           : 'bg-red-100 text-red-800 capitalize'
                       }`}>
                         {log.action}
@@ -128,7 +128,7 @@ export default function AuditModal({
         </div>
       </dialog>
 
-      {/* Workshop Modal */}
+
       <dialog 
         ref={workshopDialogRef} 
         onClick={(e) => { if (e.target === workshopDialogRef.current) setIsWorkshopOpen(false) }}

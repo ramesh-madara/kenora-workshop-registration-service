@@ -1,44 +1,30 @@
 import { cookies } from "next/headers";
 import { connection } from "next/server";
-import crypto from "crypto";
+import { SignJWT, jwtVerify } from "jose";
 
 const SECRET = process.env.SESSION_SECRET || "super-secret-key-for-workshop";
+const secretKey = new TextEncoder().encode(SECRET);
 
 export type SessionPayload = {
   id: number;
   email: string;
   role: string;
-  exp: number;
 };
 
 export async function encrypt(payload: SessionPayload): Promise<string> {
-  const text = JSON.stringify(payload);
-  const iv = crypto.randomBytes(16);
-  const key = crypto.scryptSync(SECRET, 'salt', 32);
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  
-  return iv.toString("hex") + ":" + encrypted;
+  return await new SignJWT(payload as any)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(secretKey);
 }
 
 export async function decrypt(cookieValue: string): Promise<SessionPayload | null> {
   try {
-    const parts = cookieValue.split(":");
-    if (parts.length !== 2) return null;
-    
-    const iv = Buffer.from(parts[0], "hex");
-    const encrypted = parts[1];
-    const key = crypto.scryptSync(SECRET, 'salt', 32);
-    
-    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-    let decrypted = decipher.update(encrypted, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    
-    const payload = JSON.parse(decrypted) as SessionPayload;
-    if (Date.now() > payload.exp) return null;
-    return payload;
+    const { payload } = await jwtVerify(cookieValue, secretKey, {
+      algorithms: ["HS256"],
+    });
+    return payload as unknown as SessionPayload;
   } catch (error) {
     return null;
   }
@@ -50,7 +36,6 @@ export async function createSession(user: { id: number; email: string; role: str
     id: user.id,
     email: user.email,
     role: user.role,
-    exp: expiresAt.getTime(),
   });
 
   const cookieStore = await cookies();

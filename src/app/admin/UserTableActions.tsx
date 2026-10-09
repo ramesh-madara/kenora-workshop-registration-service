@@ -16,9 +16,9 @@ export default function UserTableActions({ user }: { user: UserProps }) {
   const [isToggling, setIsToggling] = useState(false);
 
   const [state, formAction, isPending] = useActionState(updateUser, {
-    error: null,
-    success: null,
-  });
+    error: "",
+    success: "",
+  } as any);
 
   const formRef = useRef<HTMLFormElement>(null);
 

@@ -12,7 +12,7 @@ export default async function NewWorkshopPage() {
   const session = await getSession();
   
   if (!session || session.role !== "manager") {
-    redirect("/"); // Staff and Admins blocked
+    redirect("/");
   }
 
   const typesResult = await query("SELECT id, name, category FROM workshop_types ORDER BY category, name");

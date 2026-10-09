@@ -34,7 +34,7 @@ export async function upsertWorkshop(prevState: any, formData: FormData) {
 
   try {
     if (id) {
-      // Update
+
       const oldRes = await query("SELECT * FROM workshops WHERE id = $1", [parseInt(id)]);
       const old = oldRes.rows[0];
 
@@ -70,7 +70,7 @@ export async function upsertWorkshop(prevState: any, formData: FormData) {
         [session.id, "UPDATE_WORKSHOP", "WORKSHOP", parseInt(id), detailsStr]
       );
     } else {
-      // Create
+
       const res = await query(
         `INSERT INTO workshops (type_id, code, title, instructor, schedule_date, duration, capacity, location, status)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
@@ -102,13 +102,13 @@ export async function deleteWorkshop(id: number) {
   }
 
   try {
-    // Check for active registrations before deleting
+
     const checkRes = await query("SELECT COUNT(*) FROM registrations WHERE workshop_id = $1 AND status = 'active'", [id]);
     if (parseInt(checkRes.rows[0].count) > 0) {
       throw new Error("Cannot delete a workshop with active registrations. Cancel them first.");
     }
     
-    // Hard delete is okay here since there are no active dependencies, but we must delete history first
+
     await query("DELETE FROM registration_history WHERE registration_id IN (SELECT id FROM registrations WHERE workshop_id = $1)", [id]);
     await query("DELETE FROM registrations WHERE workshop_id = $1", [id]);
     await query("DELETE FROM workshops WHERE id = $1", [id]);

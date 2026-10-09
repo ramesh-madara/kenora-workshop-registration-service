@@ -42,7 +42,7 @@ export default async function WorkshopDetailsPage(props: {
   const registered = parseInt(workshop.registered_count);
   const isFull = registered >= workshop.capacity;
 
-  // --- Active Roster ---
+
   const page = parseInt(searchParams.page || "1") || 1;
   const limit = 10;
   const offset = (page - 1) * limit;
@@ -83,7 +83,7 @@ export default async function WorkshopDetailsPage(props: {
   const totalRosterCount = roster.length > 0 ? parseInt(roster[0].total_count) : 0;
   const totalPages = Math.ceil(totalRosterCount / limit);
 
-  // --- Waitlist ---
+
   const wPage = parseInt(searchParams.w_page || "1") || 1;
   const wLimit = 10;
   const wOffset = (wPage - 1) * wLimit;
@@ -118,7 +118,7 @@ export default async function WorkshopDetailsPage(props: {
   const totalWaitlistCount = waitlist.length > 0 ? parseInt(waitlist[0].total_count) : 0;
   const totalWaitlistPages = Math.ceil(totalWaitlistCount / wLimit);
 
-  // --- Audit Logs ---
+
   const auditResult = await query(`
     SELECT rh.id, r.attendee_name, rh.action, rh.action_timestamp,
            u.email as performed_by_email, u.role as performed_by_role
@@ -140,7 +140,7 @@ export default async function WorkshopDetailsPage(props: {
   `, [workshopId]);
   const workshopAuditLog = workshopAuditResult.rows;
 
-  // Helpers
+
   const getSortLink = (column: string, isWaitlist: boolean = false) => {
     const currentSort = isWaitlist ? wSort : sort;
     const currentOrder = isWaitlist ? wOrder : order;
@@ -244,7 +244,7 @@ export default async function WorkshopDetailsPage(props: {
 
           <div className="w-full lg:w-2/3 space-y-8">
             
-            {/* Active Attendees Table */}
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Active Attendees Roster</h3>
@@ -345,7 +345,7 @@ export default async function WorkshopDetailsPage(props: {
               )}
             </div>
 
-            {/* Waitlist Table */}
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Waitlist</h3>

@@ -12,7 +12,7 @@ export default async function EditWorkshopPage({ params }: { params: Promise<{ i
   const session = await getSession();
   
   if (!session || session.role !== "manager") {
-    redirect("/"); // Staff and Admins blocked
+    redirect("/");
   }
 
   const { id } = await params;

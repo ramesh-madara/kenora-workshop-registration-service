@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { upsertWorkshop, deleteWorkshop } from "./actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,14 @@ export default function WorkshopForm({ types, initialData }: WorkshopFormProps) 
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(upsertWorkshop, { error: null });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [autoCode, setAutoCode] = useState(initialData?.code || "");
+
+  useEffect(() => {
+    if (!initialData) {
+      const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
+      setAutoCode(`WS-${randomString}`);
+    }
+  }, [initialData]);
 
   const handleDelete = async () => {
     if (!initialData || !confirm("Are you sure you want to permanently delete this workshop?")) return;
@@ -29,7 +37,7 @@ export default function WorkshopForm({ types, initialData }: WorkshopFormProps) 
     }
   };
 
-  // Convert Date to local datetime-local format for the input
+
   let defaultDate = "";
   if (initialData?.schedule_date) {
     const d = new Date(initialData.schedule_date);
@@ -69,8 +77,8 @@ export default function WorkshopForm({ types, initialData }: WorkshopFormProps) 
           
           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">Workshop Code</label>
-              <input type="text" id="code" name="code" required defaultValue={initialData?.code || ""} placeholder="WS-101" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+              <label htmlFor="code" className="block text-sm font-medium text-gray-700">Workshop Code (Auto-generated)</label>
+              <input type="text" id="code" name="code" required value={autoCode} readOnly className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-600 focus:outline-none sm:text-sm cursor-not-allowed" />
             </div>
             
             <div>

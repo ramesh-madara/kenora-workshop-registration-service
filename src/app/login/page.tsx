@@ -5,8 +5,8 @@ import { loginUser } from "@/app/actions";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginUser, {
-    error: null,
-  });
+    error: "",
+  } as any);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -74,12 +74,32 @@ export default function LoginPage() {
 
           <div className="mt-6 border-t border-gray-200 pt-6">
             <div className="text-center">
-              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 inline-block text-left">
-                <strong className="text-gray-700 block mb-1 text-center">Dev Quick-Reference (pw123):</strong>
-                Admin: admin <br/>
-                Manager: manager <br/>
-                Staff: staff
-              </p>
+              <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-4 inline-block text-left w-full border border-gray-200">
+                <strong className="text-gray-700 block mb-3 text-center text-sm">Dev Quick-Reference</strong>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
+                    <span className="w-20 font-medium">Admin:</span>
+                    <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono flex-1 mx-2 text-center">admin</code>
+                    <button type="button" onClick={() => navigator.clipboard.writeText('admin')} className="text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 bg-blue-50 hover:bg-blue-100 transition-colors">Copy</button>
+                  </div>
+                  <div className="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
+                    <span className="w-20 font-medium">Manager:</span>
+                    <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono flex-1 mx-2 text-center">manager</code>
+                    <button type="button" onClick={() => navigator.clipboard.writeText('manager')} className="text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 bg-blue-50 hover:bg-blue-100 transition-colors">Copy</button>
+                  </div>
+                  <div className="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
+                    <span className="w-20 font-medium">Staff:</span>
+                    <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono flex-1 mx-2 text-center">staff</code>
+                    <button type="button" onClick={() => navigator.clipboard.writeText('staff')} className="text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 bg-blue-50 hover:bg-blue-100 transition-colors">Copy</button>
+                  </div>
+                  <div className="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm mt-4 relative top-1">
+                    <span className="w-20 font-bold text-gray-700">Password:</span>
+                    <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono flex-1 mx-2 text-center">pw123</code>
+                    <button type="button" onClick={() => navigator.clipboard.writeText('pw123')} className="text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 bg-blue-50 hover:bg-blue-100 transition-colors">Copy</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           

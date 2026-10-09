@@ -27,7 +27,7 @@ export default function RosterTables({
   const [sortBy, setSortBy] = useState("time_desc");
   const itemsPerPage = 10;
 
-  // Active Roster Filtering & Sorting
+
   let processedActive = [...activeRoster];
   
   if (searchQuery.trim()) {
@@ -46,12 +46,12 @@ export default function RosterTables({
     return 0;
   });
 
-  // Active Roster Pagination
+
   const totalActivePages = Math.max(1, Math.ceil(processedActive.length / itemsPerPage));
   const activeStart = (activePage - 1) * itemsPerPage;
   const currentActive = processedActive.slice(activeStart, activeStart + itemsPerPage);
 
-  // Waitlist Roster Pagination
+
   const totalWaitlistPages = Math.max(1, Math.ceil(waitlistRoster.length / itemsPerPage));
   const waitlistStart = (waitlistPage - 1) * itemsPerPage;
   const currentWaitlist = waitlistRoster.slice(waitlistStart, waitlistStart + itemsPerPage);
@@ -104,7 +104,7 @@ export default function RosterTables({
 
   return (
     <div className="w-full lg:w-2/3 space-y-8">
-      {/* Active Roster */}
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h3 className="text-lg leading-6 font-medium text-gray-900">Active Attendees Roster</h3>
@@ -174,27 +174,27 @@ export default function RosterTables({
         </div>
       </div>
 
-      {/* Waitlist Roster */}
+
       {waitlistRoster.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-orange-200 overflow-hidden mt-8">
-          <div className="px-6 py-5 border-b border-orange-200 bg-orange-50/50">
-            <h3 className="text-lg leading-6 font-medium text-orange-900">Waitlist Queue</h3>
-            <p className="mt-1 text-sm text-orange-700">These attendees will be automatically promoted if an active seat opens up.</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Waitlist Queue</h3>
+            <p className="mt-1 text-sm text-gray-500">These attendees will be automatically promoted if an active seat opens up.</p>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-orange-200">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-white">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Queue #</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Attendee</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Booked Date</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-orange-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue #</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked Date</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-orange-100">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {currentWaitlist.map((r, idx) => (
-                  <tr key={r.id} className="hover:bg-orange-50/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-500">
+                  <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
                       #{waitlistStart + idx + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -19,9 +19,9 @@ export default function RegistrationForm({
   isFull: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(registerAttendee, {
-    error: null,
-    success: null,
-  });
+    error: "",
+    success: "",
+  } as any);
   
   const formRef = useRef<HTMLFormElement>(null);
 
