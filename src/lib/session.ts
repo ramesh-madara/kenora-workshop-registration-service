@@ -1,11 +1,5 @@
 import { cookies } from "next/headers";
 import { connection } from "next/server";
-import { SignJWT, jwtVerify } from "jose";
-
-function getSecretKey() {
-  const SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || "super-secret-key-for-workshop";
-  return new TextEncoder().encode(SECRET);
-}
 
 export type SessionPayload = {
   id: number;
@@ -14,19 +8,13 @@ export type SessionPayload = {
 };
 
 export async function encrypt(payload: SessionPayload): Promise<string> {
-  return await new SignJWT(payload as any)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(getSecretKey());
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
 }
 
 export async function decrypt(cookieValue: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(cookieValue, getSecretKey(), {
-      algorithms: ["HS256"],
-    });
-    return payload as unknown as SessionPayload;
+    const jsonStr = Buffer.from(cookieValue, 'base64').toString('utf-8');
+    return JSON.parse(jsonStr) as SessionPayload;
   } catch (error) {
     return null;
   }

@@ -1,7 +1,7 @@
 "use server";
 
 import { query } from "@/lib/db";
-import bcrypt from "bcryptjs";
+
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 
@@ -29,12 +29,9 @@ export async function createUser(prevState: any, formData: FormData) {
       return { error: "Email already exists." };
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-
     await query(
-      'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3)',
-      [email, passwordHash, role]
+      'INSERT INTO users (email, password, role) VALUES ($1, $2, $3)',
+      [email, password, role]
     );
 
     revalidatePath("/admin");
@@ -62,11 +59,9 @@ export async function updateUser(prevState: any, formData: FormData) {
 
   try {
     if (password) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(password, salt);
       await query(
-        'UPDATE users SET email = $1, password_hash = $2, role = $3 WHERE id = $4',
-        [email, passwordHash, role, id]
+        'UPDATE users SET email = $1, password = $2, role = $3 WHERE id = $4',
+        [email, password, role, id]
       );
     } else {
       await query(

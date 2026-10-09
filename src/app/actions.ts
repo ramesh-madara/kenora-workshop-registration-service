@@ -1,7 +1,7 @@
 "use server";
 
 import { query } from "@/lib/db";
-import bcrypt from "bcryptjs";
+
 import { createSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
@@ -14,7 +14,7 @@ export async function loginUser(prevState: any, formData: FormData) {
   }
 
   try {
-    const res = await query('SELECT id, email, password_hash, role, is_active FROM users WHERE email = $1', [email]);
+    const res = await query('SELECT id, email, password, role, is_active FROM users WHERE email = $1', [email]);
     const user = res.rows[0];
 
     if (!user) {
@@ -25,7 +25,7 @@ export async function loginUser(prevState: any, formData: FormData) {
       return { error: "Your account has been deactivated. Please contact an administrator." };
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);
+    const isValid = password === user.password;
     if (!isValid) {
       return { error: "Invalid email or password." };
     }
