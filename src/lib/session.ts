@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
 
-const SECRET = process.env.SESSION_SECRET || "super-secret-key-for-workshop";
+const SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || "super-secret-key-for-workshop";
 const secretKey = new TextEncoder().encode(SECRET);
 
 export type SessionPayload = {
