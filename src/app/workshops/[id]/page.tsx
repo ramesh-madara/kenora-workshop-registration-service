@@ -55,7 +55,7 @@ export default async function WorkshopDetailsPage(props: {
            u.email as booked_by_email,
            COUNT(*) OVER() as total_count
     FROM registrations r
-    JOIN registration_history rh ON r.id = rh.registration_id AND rh.action = 'registered'
+    JOIN registration_history rh ON r.id = rh.registration_id AND rh.action IN ('registered', 'waitlisted')
     JOIN users u ON rh.performed_by = u.id
     WHERE r.workshop_id = $1 AND r.status = 'active'
   `;
