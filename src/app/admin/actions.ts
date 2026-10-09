@@ -4,11 +4,14 @@ import { query } from "@/lib/db";
 
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export async function createUser(prevState: any, formData: FormData) {
   const session = await getSession();
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
   if (!session || session.role !== "admin") {
-    return { error: `Unauthorized. Session data: ${JSON.stringify(session)}` };
+    return { error: `Unauthorized. Session: ${JSON.stringify(session)}, Cookie string: ${sessionCookie || 'missing'}` };
   }
 
   const email = formData.get("email") as string;
