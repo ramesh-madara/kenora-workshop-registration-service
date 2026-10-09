@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 export async function createUser(prevState: any, formData: FormData) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
-    return { error: "Unauthorized" };
+    return { error: `Unauthorized. Session data: ${JSON.stringify(session)}` };
   }
 
   const email = formData.get("email") as string;
