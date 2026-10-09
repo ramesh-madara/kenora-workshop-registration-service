@@ -13,9 +13,15 @@ export default function LoginPage() {
   } as any);
 
   useEffect(() => {
-    if (state.success && state.redirectUrl && state.sessionData) {
-      document.cookie = `session=${encodeURIComponent(state.sessionData)}; path=/; max-age=604800`;
-      router.push(state.redirectUrl);
+    console.log("Login state updated:", state);
+    if (state.success) {
+      if (!state.sessionData) {
+        console.error("SUCCESS BUT NO SESSION DATA!");
+      } else {
+        console.log("Setting cookie:", state.sessionData);
+        document.cookie = `session=${encodeURIComponent(state.sessionData)}; path=/; max-age=604800`;
+        router.push(state.redirectUrl);
+      }
     }
   }, [state, router]);
 
