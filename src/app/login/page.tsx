@@ -13,10 +13,15 @@ export default function LoginPage() {
   } as any);
 
   useEffect(() => {
-    if (state.success && state.redirectUrl) {
-      router.push(state.redirectUrl);
+    if (state?.success && state?.token) {
+      document.cookie = `session=${encodeURIComponent(state.token)}; path=/; max-age=28800; SameSite=Lax; Secure`;
+      if (state.role === 'admin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/';
+      }
     }
-  }, [state, router]);
+  }, [state]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

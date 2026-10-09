@@ -3,7 +3,6 @@
 import { query } from "@/lib/db";
 
 import { createSession } from "@/lib/session";
-import { redirect } from "next/navigation";
 
 export async function loginUser(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
@@ -12,8 +11,6 @@ export async function loginUser(prevState: any, formData: FormData) {
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
-
-  let redirectUrl = "";
 
   try {
     const res = await query('SELECT id, email, password, role, is_active FROM users WHERE email = $1', [email]);
@@ -32,22 +29,16 @@ export async function loginUser(prevState: any, formData: FormData) {
       return { error: "Invalid email or password." };
     }
 
-    // Determine redirect url BEFORE setting session
-    redirectUrl = user.role === 'admin' ? "/admin" : "/";
-
-    await createSession({
+    const sessionData = await createSession({
       id: user.id,
       email: user.email,
       role: user.role
     });
+    
+    return { success: true, token: sessionData, role: user.role };
 
   } catch (err) {
     console.error(err);
     return { error: "An unexpected error occurred." };
-  }
-
-  // 3. MUST be called outside the try/catch block, with no async work in between!
-  if (redirectUrl) {
-    redirect(redirectUrl);
   }
 }

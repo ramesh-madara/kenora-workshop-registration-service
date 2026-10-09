@@ -21,23 +21,13 @@ export async function decrypt(cookieValue: string): Promise<SessionPayload | nul
 }
 
 export async function createSession(user: { id: number; email: string; role: string }) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const sessionData = await encrypt({
     id: user.id,
     email: user.email,
     role: user.role,
   });
 
-  const cookieStore = await cookies();
-  const isProd = process.env.NODE_ENV === "production";
-  
-  cookieStore.set("session", sessionData, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
-    expires: expiresAt,
-    path: "/",
-  });
+  return sessionData;
 }
 
 export async function getSession() {
