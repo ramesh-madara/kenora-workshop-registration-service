@@ -1,7 +1,7 @@
 # Workshop Registration Service
 
 > ## 🌐 LIVE DEMO
-> # 👉 [https://kenora-workshop-registration-service-9h52n0mkd.vercel.app/](https://kenora-workshop-registration-servic.vercel.app/)
+> # 👉 [https://kenora-workshop-registration-service-9h52n0mkd.vercel.app/](https://kenora-workshop-registration-service-9h52n0mkd.vercel.app/)
 > ### Test Accounts — Password for all: `pw123`
 > | Role | Username |
 > |------|----------|
