@@ -13,7 +13,8 @@ export default function LoginPage() {
   } as any);
 
   useEffect(() => {
-    if (state.success && state.redirectUrl) {
+    if (state.success && state.redirectUrl && state.sessionData) {
+      document.cookie = `session=${encodeURIComponent(state.sessionData)}; path=/; max-age=604800`;
       router.push(state.redirectUrl);
     }
   }, [state, router]);
@@ -22,7 +23,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Staff Sign In.
+          Staff Sign In..
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Sign in to access the workshop manager

@@ -30,21 +30,20 @@ export async function loginUser(prevState: any, formData: FormData) {
       return { error: "Invalid email or password." };
     }
 
-    await createSession({
+    const sessionData = await createSession({
       id: user.id,
       email: user.email,
       role: user.role
     });
 
+    const roleRes = await query('SELECT role FROM users WHERE email = $1', [email]);
+    if (roleRes.rows[0].role === 'admin') {
+      return { success: true, redirectUrl: "/admin", sessionData };
+    } else {
+      return { success: true, redirectUrl: "/", sessionData };
+    }
   } catch (err) {
     console.error(err);
     return { error: "An unexpected error occurred." };
-  }
-
-  const roleRes = await query('SELECT role FROM users WHERE email = $1', [email]);
-  if (roleRes.rows[0].role === 'admin') {
-    return { success: true, redirectUrl: "/admin" };
-  } else {
-    return { success: true, redirectUrl: "/" };
   }
 }

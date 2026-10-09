@@ -13,7 +13,8 @@ export async function encrypt(payload: SessionPayload): Promise<string> {
 
 export async function decrypt(cookieValue: string): Promise<SessionPayload | null> {
   try {
-    return JSON.parse(cookieValue) as SessionPayload;
+    const decoded = decodeURIComponent(cookieValue);
+    return JSON.parse(decoded) as SessionPayload;
   } catch (error) {
     return null;
   }
@@ -28,11 +29,14 @@ export async function createSession(user: { id: number; email: string; role: str
   });
 
   const cookieStore = await cookies();
+  // Still set on server just in case, but drop httpOnly so client can override
   cookieStore.set("session", sessionData, {
-    httpOnly: true,
+    httpOnly: false,
     expires: expiresAt,
     path: "/",
   });
+
+  return sessionData;
 }
 
 export async function getSession() {
