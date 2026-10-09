@@ -1,5 +1,9 @@
 import { cookies } from "next/headers";
 import { connection } from "next/server";
+import { SignJWT, jwtVerify } from "jose";
+
+const secretKey = process.env.SESSION_SECRET || "default_secret_key_that_should_be_changed";
+const key = new TextEncoder().encode(secretKey);
 
 export type SessionPayload = {
   id: number;
@@ -8,13 +12,20 @@ export type SessionPayload = {
 };
 
 export async function encrypt(payload: SessionPayload): Promise<string> {
-  return JSON.stringify(payload);
+  return await new SignJWT(payload as any)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("8h")
+    .sign(key);
 }
 
 export async function decrypt(cookieValue: string): Promise<SessionPayload | null> {
   try {
     const decoded = decodeURIComponent(cookieValue);
-    return JSON.parse(decoded) as SessionPayload;
+    const { payload } = await jwtVerify(decoded, key, {
+      algorithms: ["HS256"],
+    });
+    return payload as SessionPayload;
   } catch (error) {
     return null;
   }
