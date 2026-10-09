@@ -67,9 +67,9 @@ export default async function DashboardPage(props: { searchParams: Promise<Recor
                 {session.role}
               </span>
               <span className="text-sm text-brand-text-muted hidden sm:block">{session.email}</span>
-              <Link href="/logout" className="text-sm font-medium text-brand-link hover:text-brand-text transition-colors">
+              <a href="/logout" className="text-sm font-medium text-brand-link hover:text-brand-text transition-colors">
                 Logout
-              </Link>
+              </a>
             </div>
           </div>
         </div>
