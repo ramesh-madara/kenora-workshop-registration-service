@@ -98,4 +98,24 @@ export async function deleteUser(id: number) {
     throw new Error("Failed to delete user. They may have related records.");
   }
 }
+}
 
+export async function toggleUserStatus(id: number, isActive: boolean) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  // Prevent admin from deactivating themselves
+  if (session.id === id) {
+    throw new Error("Cannot deactivate your own account.");
+  }
+
+  try {
+    await query('UPDATE users SET is_active = $1 WHERE id = $2', [isActive, id]);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: any) {
+    console.error(err);
+    throw new Error("Failed to update user status.");
+  }

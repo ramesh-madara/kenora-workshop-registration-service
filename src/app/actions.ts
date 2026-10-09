@@ -14,11 +14,15 @@ export async function loginUser(prevState: any, formData: FormData) {
   }
 
   try {
-    const res = await query('SELECT id, email, password_hash, role FROM users WHERE email = $1', [email]);
+    const res = await query('SELECT id, email, password_hash, role, is_active FROM users WHERE email = $1', [email]);
     const user = res.rows[0];
 
     if (!user) {
       return { error: "Invalid email or password." };
+    }
+    
+    if (!user.is_active) {
+      return { error: "Your account has been deactivated. Please contact an administrator." };
     }
 
     const isValid = await bcrypt.compare(password, user.password_hash);

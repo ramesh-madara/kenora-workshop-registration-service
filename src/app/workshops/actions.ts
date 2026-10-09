@@ -35,6 +35,9 @@ export async function upsertWorkshop(prevState: any, formData: FormData) {
   try {
     if (id) {
       // Update
+      const oldRes = await query("SELECT * FROM workshops WHERE id = $1", [parseInt(id)]);
+      const old = oldRes.rows[0];
+
       await query(
         `UPDATE workshops 
          SET type_id = $1, code = $2, title = $3, instructor = $4, schedule_date = $5, duration = $6, capacity = $7, location = $8, status = $9
@@ -42,9 +45,29 @@ export async function upsertWorkshop(prevState: any, formData: FormData) {
         [type_id, code, title, instructor, schedule_date, duration, capacity, location, status, parseInt(id)]
       );
       
+      const changes = [];
+      if (old.title !== title) changes.push(`title to '${title}'`);
+      if (old.instructor !== instructor) changes.push(`instructor to '${instructor}'`);
+      if (old.location !== location) changes.push(`location to '${location}'`);
+      if (old.capacity !== capacity) changes.push(`capacity to ${capacity}`);
+      if (old.duration !== duration) changes.push(`duration to ${duration}m`);
+      if (old.status !== status) changes.push(`status to '${status}'`);
+      if (old.type_id !== type_id) changes.push(`type to ${type_id}`);
+      if (old.code !== code) changes.push(`code to '${code}'`);
+      
+      const oldDate = new Date(old.schedule_date).getTime();
+      const newDate = new Date(schedule_date).getTime();
+      if (oldDate !== newDate) {
+        changes.push(`date to ${new Date(schedule_date).toLocaleString()}`);
+      }
+
+      const detailsStr = changes.length > 0 
+        ? `Updated ${changes.join(", ")}`
+        : `Updated workshop without changes`;
+
       await query(
         "INSERT INTO system_audit_logs (user_id, action, entity_type, entity_id, details) VALUES ($1, $2, $3, $4, $5)",
-        [session.id, "UPDATE_WORKSHOP", "WORKSHOP", parseInt(id), `Updated workshop ${code}: ${title}`]
+        [session.id, "UPDATE_WORKSHOP", "WORKSHOP", parseInt(id), detailsStr]
       );
     } else {
       // Create

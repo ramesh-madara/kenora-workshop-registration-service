@@ -1,8 +1,9 @@
 import { query } from "@/lib/db";
 import CreateUserForm from "./CreateUserForm";
+import UserTableActions from "./UserTableActions";
 
 export default async function AdminPage() {
-  const usersResult = await query("SELECT id, email, role, created_at FROM users ORDER BY created_at DESC");
+  const usersResult = await query("SELECT id, email, role, is_active, created_at FROM users ORDER BY created_at DESC");
   const users = usersResult.rows;
 
   return (
@@ -36,7 +37,13 @@ export default async function AdminPage() {
                     Role
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -50,19 +57,27 @@ export default async function AdminPage() {
                       <div className="text-sm font-medium text-gray-900">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize \${user.role === 'admin' ? 'bg-red-100 text-red-800' : user.role === 'manager' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${user.role === 'admin' ? 'bg-red-100 text-red-800' : user.role === 'manager' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
                         {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${user.is_active ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {user.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <UserTableActions user={user} />
                     </td>
                   </tr>
                 ))}
                 
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
                       No users found.
                     </td>
                   </tr>

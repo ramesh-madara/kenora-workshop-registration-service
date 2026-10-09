@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useActionState, useRef, useEffect } from "react";
-import { deleteUser, updateUser } from "./actions";
+import { deleteUser, updateUser, toggleUserStatus } from "./actions";
 
 type UserProps = {
   id: number;
   email: string;
   role: string;
+  is_active: boolean;
 };
 
 export default function UserTableActions({ user }: { user: UserProps }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const [state, formAction, isPending] = useActionState(updateUser, {
     error: null,
@@ -37,11 +39,29 @@ export default function UserTableActions({ user }: { user: UserProps }) {
     }
   };
 
+  const handleToggleStatus = async () => {
+    setIsToggling(true);
+    try {
+      await toggleUserStatus(user.id, !user.is_active);
+    } catch (err: any) {
+      alert(err.message || "Failed to update status.");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <div className="flex justify-end space-x-3">
       <button
+        onClick={handleToggleStatus}
+        disabled={isToggling}
+        className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors disabled:opacity-50"
+      >
+        {isToggling ? "Updating..." : user.is_active ? "Deactivate" : "Reactivate"}
+      </button>
+      <button
         onClick={() => setIsEditing(true)}
-        className="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition-colors"
+        className="text-brand-primary hover:text-brand-primary-hover text-sm font-medium transition-colors"
       >
         Edit
       </button>
