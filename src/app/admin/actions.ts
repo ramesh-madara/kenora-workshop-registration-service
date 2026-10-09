@@ -48,7 +48,7 @@ export async function createUser(prevState: any, formData: FormData) {
 export async function updateUser(prevState: any, formData: FormData) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
-    return { error: "Unauthorized" };
+    return { error: `Unauthorized. Session data: ${JSON.stringify(session)}` };
   }
 
   const id = formData.get("id") as string;
@@ -86,7 +86,7 @@ export async function updateUser(prevState: any, formData: FormData) {
 export async function deleteUser(id: number) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
-    throw new Error("Unauthorized");
+    throw new Error(`Unauthorized. Session data: ${JSON.stringify(session)}`);
   }
 
   try {
@@ -102,7 +102,7 @@ export async function deleteUser(id: number) {
 export async function toggleUserStatus(id: number, isActive: boolean) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
-    throw new Error("Unauthorized");
+    throw new Error(`Unauthorized. Session data: ${JSON.stringify(session)}`);
   }
 
 
