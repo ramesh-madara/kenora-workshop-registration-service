@@ -29,12 +29,9 @@ export async function createSession(user: { id: number; email: string; role: str
   });
 
   const cookieStore = await cookies();
-  const isProd = process.env.NODE_ENV === "production";
   cookieStore.set("session", sessionData, {
     httpOnly: true,
-    secure: isProd,
     expires: expiresAt,
-    sameSite: isProd ? "none" : "lax",
     path: "/",
   });
 }
