@@ -4,6 +4,7 @@ const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({
   connectionString: connectionString || 'postgresql://postgres:postgres@localhost:5432/workshop-db',
+  ssl: connectionString ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
