@@ -14,7 +14,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (state?.success && state?.token) {
-      document.cookie = `session=${encodeURIComponent(state.token)}; path=/; max-age=28800; SameSite=Lax; Secure`;
+      console.log("Token received on frontend:", state.token);
+      
+      const isSecure = window.location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `session=${encodeURIComponent(state.token)}; path=/; max-age=28800; SameSite=Lax${isSecure}`;
+      
+      console.log("Cookie string set:", document.cookie);
+
       if (state.role === 'admin') {
         window.location.href = '/admin';
       } else {
