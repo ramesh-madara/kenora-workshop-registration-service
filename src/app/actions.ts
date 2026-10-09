@@ -13,6 +13,8 @@ export async function loginUser(prevState: any, formData: FormData) {
     return { error: "Email and password are required." };
   }
 
+  let redirectUrl = "";
+
   try {
     const res = await query('SELECT id, email, password, role, is_active FROM users WHERE email = $1', [email]);
     const user = res.rows[0];
@@ -30,20 +32,22 @@ export async function loginUser(prevState: any, formData: FormData) {
       return { error: "Invalid email or password." };
     }
 
-    const sessionData = await createSession({
+    // Determine redirect url BEFORE setting session
+    redirectUrl = user.role === 'admin' ? "/admin" : "/";
+
+    await createSession({
       id: user.id,
       email: user.email,
       role: user.role
     });
 
-    const roleRes = await query('SELECT role FROM users WHERE email = $1', [email]);
-    if (roleRes.rows[0].role === 'admin') {
-      return { success: true, redirectUrl: "/admin", sessionData };
-    } else {
-      return { success: true, redirectUrl: "/", sessionData };
-    }
   } catch (err) {
     console.error(err);
     return { error: "An unexpected error occurred." };
+  }
+
+  // 3. MUST be called outside the try/catch block, with no async work in between!
+  if (redirectUrl) {
+    redirect(redirectUrl);
   }
 }

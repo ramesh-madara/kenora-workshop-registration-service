@@ -29,14 +29,15 @@ export async function createSession(user: { id: number; email: string; role: str
   });
 
   const cookieStore = await cookies();
-  // Still set on server just in case, but drop httpOnly so client can override
+  const isProd = process.env.NODE_ENV === "production";
+  
   cookieStore.set("session", sessionData, {
-    httpOnly: false,
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax',
     expires: expiresAt,
     path: "/",
   });
-
-  return sessionData;
 }
 
 export async function getSession() {
