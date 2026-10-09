@@ -19,7 +19,7 @@ A full-stack, internal staff-facing web application for managing community train
 ### Prerequisites
 - Node.js (v18+)
 - npm
-- PostgreSQL Database (Optimized for Neon)
+- PostgreSQL Database
 
 ### Installation
 
@@ -28,21 +28,25 @@ A full-stack, internal staff-facing web application for managing community train
    npm install
    ```
 
-2. **Environment Configuration**
+2. **Database Setup**
+   Ensure you have PostgreSQL installed on your local machine.
+   Create a new database named `workshop-db` with the username `postgres` and password `postgres`.
+
+3. **Environment Configuration**
    Create a `.env.local` file in the root directory:
    ```env
-   DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=verify-full"
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/workshop-db"
    SESSION_SECRET="your-very-secure-random-32-char-secret-key"
    ```
    *(Alternatively, if using Neon Serverless Postgres, simply run `npx neon login` and `npx neon link` to inject the database URL automatically).*
 
-3. **Database Setup & Seeding**
+4. **Database Setup & Seeding**
    Initialize the database schema and seed mock data:
    ```bash
    npm run db:setup
    ```
 
-4. **Run the Development Server**
+5. **Run the Development Server**
    ```bash
    npm run dev
    ```
