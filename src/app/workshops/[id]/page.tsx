@@ -8,7 +8,10 @@ import CancelButton from "./CancelButton";
 
 export const instant = false;
 
-export default async function WorkshopDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function WorkshopDetailsPage(props: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<Record<string, string | undefined>>
+}) {
   await connection();
   const session = await getSession();
   
@@ -16,7 +19,9 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
     redirect("/login");
   }
 
-  const { id } = await params;
+  const { id } = await props.params;
+  const searchParams = await props.searchParams;
+  
   const workshopId = parseInt(id);
 
   const wsResult = await query(`
@@ -36,18 +41,49 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
   const registered = parseInt(workshop.registered_count);
   const isFull = registered >= workshop.capacity;
 
-  const rosterResult = await query(`
+  // --- Roster Pagination, Sorting, & Searching ---
+  const page = parseInt(searchParams.page || "1") || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+  const search = searchParams.search || "";
+  const sort = searchParams.sort || "created_at";
+  const order = searchParams.order === "asc" ? "asc" : "desc";
+
+  let rosterQuery = `
     SELECT r.id, r.attendee_name, r.attendee_email, r.created_at,
-           u.email as booked_by_email
+           u.email as booked_by_email,
+           COUNT(*) OVER() as total_count
     FROM registrations r
     JOIN registration_history rh ON r.id = rh.registration_id AND rh.action = 'registered'
     JOIN users u ON rh.performed_by = u.id
     WHERE r.workshop_id = $1 AND r.status = 'active'
-    ORDER BY r.created_at DESC
-  `, [workshopId]);
-  
-  const roster = rosterResult.rows;
+  `;
+  const rosterValues: any[] = [workshopId];
+  let paramIdx = 2;
 
+  if (search) {
+    rosterQuery += ` AND (r.attendee_name ILIKE $${paramIdx} OR r.attendee_email ILIKE $${paramIdx})`;
+    rosterValues.push(`%${search}%`);
+    paramIdx++;
+  }
+
+  const sortMap: Record<string, string> = {
+    'attendee_name': 'r.attendee_name',
+    'attendee_email': 'r.attendee_email',
+    'booked_by_email': 'u.email',
+    'created_at': 'r.created_at'
+  };
+  const sortCol = sortMap[sort] || sortMap['created_at'];
+
+  rosterQuery += ` ORDER BY ${sortCol} ${order === 'asc' ? 'ASC' : 'DESC'} LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
+  rosterValues.push(limit, offset);
+
+  const rosterResult = await query(rosterQuery, rosterValues);
+  const roster = rosterResult.rows;
+  const totalRosterCount = roster.length > 0 ? parseInt(roster[0].total_count) : 0;
+  const totalPages = Math.ceil(totalRosterCount / limit);
+
+  // --- Audit Log ---
   const auditResult = await query(`
     SELECT rh.id, r.attendee_name, rh.action, rh.action_timestamp,
            u.email as performed_by_email, u.role as performed_by_role
@@ -59,6 +95,15 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
   `, [workshopId]);
   
   const auditLog = auditResult.rows;
+
+  // Helper to generate sort links
+  const getSortLink = (column: string) => {
+    const nextOrder = (sort === column && order === 'asc') ? 'desc' : 'asc';
+    const params = new URLSearchParams(searchParams as any);
+    params.set('sort', column);
+    params.set('order', nextOrder);
+    return `?${params.toString()}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
@@ -122,21 +167,59 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
         <div className="mt-8 flex flex-col lg:flex-row gap-8 items-start">
           
           <div className="w-full lg:w-1/3 sticky top-24">
-            <RegistrationForm workshopId={workshopId} isFull={isFull} />
+            <RegistrationForm 
+              workshopId={workshopId} 
+              isFull={isFull} 
+              title={workshop.title}
+              code={workshop.code}
+              capacity={workshop.capacity}
+              registeredCount={registered}
+            />
           </div>
 
           <div className="w-full lg:w-2/3 space-y-8">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
+              <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Active Attendees Roster</h3>
+                <form method="GET" className="flex w-full sm:w-auto">
+                  <input type="hidden" name="sort" value={sort} />
+                  <input type="hidden" name="order" value={order} />
+                  <input 
+                    type="text" 
+                    name="search" 
+                    defaultValue={search}
+                    placeholder="Search name or email..." 
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-blue-700">
+                    Search
+                  </button>
+                  {search && (
+                    <Link href={`?sort=${sort}&order=${order}`} className="ml-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 rounded-lg flex items-center">
+                      Clear
+                    </Link>
+                  )}
+                </form>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-white">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked By</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked Date</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <Link href={getSortLink('attendee_name')} className="hover:text-blue-600">
+                          Attendee {sort === 'attendee_name' && (order === 'asc' ? '↑' : '↓')}
+                        </Link>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <Link href={getSortLink('booked_by_email')} className="hover:text-blue-600">
+                          Booked By {sort === 'booked_by_email' && (order === 'asc' ? '↑' : '↓')}
+                        </Link>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <Link href={getSortLink('created_at')} className="hover:text-blue-600">
+                          Booked Date {sort === 'created_at' && (order === 'asc' ? '↑' : '↓')}
+                        </Link>
+                      </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -161,13 +244,36 @@ export default async function WorkshopDetailsPage({ params }: { params: Promise<
                     {roster.length === 0 && (
                       <tr>
                         <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                          No attendees registered yet.
+                          {search ? 'No attendees found matching your search.' : 'No attendees registered yet.'}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200 bg-white flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    Showing <span className="font-medium">{offset + 1}</span> to <span className="font-medium">{Math.min(offset + limit, totalRosterCount)}</span> of <span className="font-medium">{totalRosterCount}</span> attendees
+                  </div>
+                  <div className="flex space-x-2">
+                    <Link 
+                      href={`?page=${Math.max(page - 1, 1)}&sort=${sort}&order=${order}&search=${search}`}
+                      className={`px-3 py-1 border rounded-md text-sm font-medium ${page <= 1 ? 'border-gray-200 text-gray-400 pointer-events-none' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Previous
+                    </Link>
+                    <Link 
+                      href={`?page=${Math.min(page + 1, totalPages)}&sort=${sort}&order=${order}&search=${search}`}
+                      className={`px-3 py-1 border rounded-md text-sm font-medium ${page >= totalPages ? 'border-gray-200 text-gray-400 pointer-events-none' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Next
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">

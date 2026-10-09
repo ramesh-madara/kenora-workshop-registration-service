@@ -74,9 +74,11 @@ export default function LoginPage() {
 
           <div className="mt-6 border-t border-gray-200 pt-6">
             <div className="text-center">
-              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 inline-block">
-                <strong className="text-gray-700">Dev Quick-Reference:</strong><br />
-                Admin: admin / pw123
+              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 inline-block text-left">
+                <strong className="text-gray-700 block mb-1 text-center">Dev Quick-Reference (pw123):</strong>
+                Admin: admin <br/>
+                Manager: manager <br/>
+                Staff: staff
               </p>
             </div>
           </div>

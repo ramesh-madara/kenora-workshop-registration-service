@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS workshops (
     title VARCHAR(255) NOT NULL,
     instructor VARCHAR(255) NOT NULL,
     schedule_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    duration INT NOT NULL DEFAULT 60,
     capacity INT NOT NULL CHECK (capacity > 0),
     status VARCHAR(50) NOT NULL DEFAULT 'published' CHECK (status IN ('published', 'draft', 'cancelled')),
     location VARCHAR(255) NOT NULL,
@@ -56,3 +57,22 @@ CREATE TABLE IF NOT EXISTS registration_history (
 CREATE INDEX IF NOT EXISTS idx_workshops_status ON workshops(status);
 CREATE INDEX IF NOT EXISTS idx_workshops_schedule_date ON workshops(schedule_date);
 CREATE INDEX IF NOT EXISTS idx_registrations_workshop_status ON registrations(workshop_id, status);
+
+-- Broad System Audit Logs
+CREATE TABLE IF NOT EXISTS system_audit_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id),
+    action VARCHAR(50) NOT NULL,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INT,
+    details TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed Data for Users (pw123)
+INSERT INTO users (email, password_hash, role) VALUES 
+('admin', '$2b$10$7PWlp3HkjD1PrJR5nQgNuecjeebV3nWKHOznrg8/okrGbKe/leVkO', 'admin'),
+('manager', '$2b$10$7PWlp3HkjD1PrJR5nQgNuecjeebV3nWKHOznrg8/okrGbKe/leVkO', 'manager'),
+('staff', '$2b$10$7PWlp3HkjD1PrJR5nQgNuecjeebV3nWKHOznrg8/okrGbKe/leVkO', 'staff')
+ON CONFLICT (email) DO NOTHING;
+

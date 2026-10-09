@@ -44,3 +44,58 @@ export async function createUser(prevState: any, formData: FormData) {
     return { error: "An unexpected error occurred while creating the user." };
   }
 }
+
+export async function updateUser(prevState: any, formData: FormData) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    return { error: "Unauthorized" };
+  }
+
+  const id = formData.get("id") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as string;
+
+  if (!id || !email || !role) {
+    return { error: "Required fields are missing." };
+  }
+
+  try {
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(password, salt);
+      await query(
+        'UPDATE users SET email = $1, password_hash = $2, role = $3 WHERE id = $4',
+        [email, passwordHash, role, id]
+      );
+    } else {
+      await query(
+        'UPDATE users SET email = $1, role = $2 WHERE id = $3',
+        [email, role, id]
+      );
+    }
+
+    revalidatePath("/admin");
+    return { success: "User updated successfully." };
+  } catch (err) {
+    console.error(err);
+    return { error: "An unexpected error occurred while updating the user." };
+  }
+}
+
+export async function deleteUser(id: number) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    await query('DELETE FROM users WHERE id = $1', [id]);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: any) {
+    console.error(err);
+    throw new Error("Failed to delete user. They may have related records.");
+  }
+}
+

@@ -31,31 +31,35 @@ export async function seedAdminUser(customPool?: Pool) {
   const pool = customPool || new Pool({ connectionString });
 
   try {
-    const username = 'admin';
-    const plainPassword = 'pw123';
-    const role = 'admin';
+    const usersToSeed = [
+      { username: 'admin', plainPassword: 'pw123', role: 'admin' },
+      { username: 'manager', plainPassword: 'pw123', role: 'manager' },
+      { username: 'staff', plainPassword: 'pw123', role: 'staff' }
+    ];
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(plainPassword, salt);
+    for (const u of usersToSeed) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(u.plainPassword, salt);
 
-    // Upsert admin user
-    const query = `
-      INSERT INTO users (email, password_hash, role)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (email) 
-      DO UPDATE SET 
-        password_hash = EXCLUDED.password_hash,
-        role = EXCLUDED.role
-      RETURNING id, email, role, created_at;
-    `;
+      const query = `
+        INSERT INTO users (email, password_hash, role)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (email) 
+        DO UPDATE SET 
+          password_hash = EXCLUDED.password_hash,
+          role = EXCLUDED.role
+        RETURNING id, email, role, created_at;
+      `;
 
-    const res = await pool.query(query, [username, passwordHash, role]);
-    console.log(`[Seed] Successfully seeded admin user:`, {
-      id: res.rows[0].id,
-      username: res.rows[0].email,
-      role: res.rows[0].role,
-    });
-    return res.rows[0];
+      const res = await pool.query(query, [u.username, passwordHash, u.role]);
+      console.log(`[Seed] Successfully seeded user:`, {
+        id: res.rows[0].id,
+        username: res.rows[0].email,
+        role: res.rows[0].role,
+      });
+    }
+
+    return true;
   } catch (error) {
     console.error('[Seed] Error seeding admin user:', error);
     throw error;

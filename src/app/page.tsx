@@ -4,40 +4,70 @@ import { query } from "@/lib/db";
 import Link from "next/link";
 import { connection } from "next/server";
 
+import FilterBar from "./FilterBar";
+
 export const instant = false;
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: { searchParams: Promise<Record<string, string>> }) {
   await connection();
+  const searchParams = await props.searchParams;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
 
-  const workshopsResult = await query(`
+  let sql = `
     SELECT w.id, w.title, w.instructor, w.location, w.schedule_date, w.capacity,
            t.name as type_name, t.category as type_category,
            (SELECT COUNT(*) FROM registrations r WHERE r.workshop_id = w.id AND r.status = 'active') as registered_count
     FROM workshops w
     JOIN workshop_types t ON w.type_id = t.id
-    ORDER BY w.schedule_date ASC
-  `);
+    WHERE 1=1
+  `;
   
-  const workshops = workshopsResult.rows;
+  const values: any[] = [];
+  let paramIdx = 1;
+
+  if (searchParams.fromDate) {
+    sql += ` AND w.schedule_date >= $${paramIdx++}`;
+    values.push(searchParams.fromDate);
+  }
+  if (searchParams.toDate) {
+    sql += ` AND w.schedule_date <= $${paramIdx++}`;
+    values.push(searchParams.toDate + " 23:59:59");
+  }
+  if (searchParams.status) {
+    sql += ` AND w.status = $${paramIdx++}`;
+    values.push(searchParams.status);
+  }
+  if (searchParams.location) {
+    sql += ` AND w.location = $${paramIdx++}`;
+    values.push(searchParams.location);
+  }
+
+  sql += ` ORDER BY w.schedule_date ASC`;
+
+  const workshopsResult = await query(sql, values);
+  let workshops = workshopsResult.rows;
+
+  if (searchParams.availableOnly === "true") {
+    workshops = workshops.filter(w => parseInt(w.registered_count) < w.capacity);
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-brand-bg pb-12 text-brand-text">
+      <nav className="bg-brand-surface border-b border-brand-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-gray-900 tracking-tight">WorkshopManager</span>
+              <span className="text-xl font-bold text-brand-text tracking-tight">WorkshopManager</span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-accent text-brand-bg capitalize">
                 {session.role}
               </span>
-              <span className="text-sm text-gray-500 hidden sm:block">{session.email}</span>
-              <Link href="/logout" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <span className="text-sm text-brand-text-muted hidden sm:block">{session.email}</span>
+              <Link href="/logout" className="text-sm font-medium text-brand-link hover:text-brand-text transition-colors">
                 Logout
               </Link>
             </div>
@@ -48,18 +78,20 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Active Workshops</h1>
-            <p className="mt-1 text-sm text-gray-500">Manage and monitor upcoming sessions across all locations.</p>
+            <h1 className="text-2xl font-bold text-brand-text">Active Workshops</h1>
+            <p className="mt-1 text-sm text-brand-text-muted">Manage and monitor upcoming sessions across all locations.</p>
           </div>
           {(session.role === "manager" || session.role === "admin") && (
             <Link 
               href="/workshops/new" 
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-brand-primary hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors"
             >
               Create New Workshop
             </Link>
           )}
         </div>
+        
+        <FilterBar currentParams={searchParams} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {workshops.map((workshop) => {

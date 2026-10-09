@@ -47,7 +47,7 @@ export async function seedWorkshops(customPool?: Pool) {
       typeIds[t.name] = res.rows[0].id;
     }
 
-    const locations = ['Room 101', 'Auditorium', 'Lab A', 'Studio B', 'Gymnasium'];
+    const locations = ['Colombo', 'Nugegoda', 'Mount Lavinia'];
     const instructors = ['Alice Smith', 'Bob Jones', 'Charlie Brown', 'Diana Prince', 'Evan Wright'];
 
     const countRes = await pool.query('SELECT COUNT(*) FROM workshops');
@@ -57,8 +57,8 @@ export async function seedWorkshops(customPool?: Pool) {
     }
 
     const insertQuery = `
-      INSERT INTO workshops (type_id, code, title, instructor, schedule_date, capacity, status, location)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO workshops (type_id, code, title, instructor, schedule_date, duration, capacity, status, location)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `;
 
     for (let i = 0; i < 15; i++) {
@@ -71,8 +71,9 @@ export async function seedWorkshops(customPool?: Pool) {
       futureDate.setDate(futureDate.getDate() + (i + 1) * 2);
       futureDate.setHours(10 + (i % 5), 0, 0, 0);
       const capacity = 10 + (i % 3) * 10;
+      const duration = 60 + (i % 3) * 30; // 60, 90, 120
       const status = 'published';
-      const location = locations[i % 5];
+      const location = locations[i % 3];
 
       await pool.query(insertQuery, [
         typeId,
@@ -80,6 +81,7 @@ export async function seedWorkshops(customPool?: Pool) {
         title,
         instructor,
         futureDate,
+        duration,
         capacity,
         status,
         location

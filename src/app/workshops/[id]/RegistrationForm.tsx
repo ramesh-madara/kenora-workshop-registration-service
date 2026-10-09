@@ -1,9 +1,23 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useEffect } from "react";
 import { registerAttendee } from "./actions";
 
-export default function RegistrationForm({ workshopId, isFull }: { workshopId: number, isFull: boolean }) {
+export default function RegistrationForm({ 
+  workshopId, 
+  title,
+  code,
+  capacity,
+  registeredCount,
+  isFull 
+}: { 
+  workshopId: number;
+  title: string;
+  code: string;
+  capacity: number;
+  registeredCount: number;
+  isFull: boolean;
+}) {
   const [state, formAction, isPending] = useActionState(registerAttendee, {
     error: null,
     success: null,
@@ -11,20 +25,30 @@ export default function RegistrationForm({ workshopId, isFull }: { workshopId: n
   
   const formRef = useRef<HTMLFormElement>(null);
 
-  if (state.success && formRef.current) {
-    formRef.current.reset();
-    state.success = null;
-  }
+  useEffect(() => {
+    if (state.success && formRef.current) {
+      formRef.current.reset();
+    }
+  }, [state.success]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mt-6">
-      <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
-        <div>
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Attendee Registration</h3>
-          <p className="mt-1 text-sm text-gray-500">Quick-intake form for phone and walk-in registrations.</p>
+    <div className="bg-brand-surface rounded-2xl shadow-sm border border-brand-border overflow-hidden mt-6">
+      <div className="px-6 py-5 border-b border-brand-border bg-brand-bg/50 flex flex-col gap-2">
+        <div className="flex justify-between items-start">
+          <h3 className="text-lg leading-6 font-bold text-brand-text">Register Attendee</h3>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-primary text-brand-bg">
+            {code}
+          </span>
+        </div>
+        <p className="text-sm text-brand-text font-medium">{title}</p>
+        <div className="flex justify-between items-center mt-2">
+          <span className="text-xs text-brand-text-muted uppercase font-bold tracking-wider">Availability</span>
+          <span className={`text-sm font-bold ${isFull ? 'text-red-600' : 'text-brand-text'}`}>
+            {capacity - registeredCount} seats left
+          </span>
         </div>
         {isFull && (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+          <span className="mt-2 inline-flex items-center justify-center w-full px-3 py-1 rounded-md text-sm font-bold bg-red-100 text-red-800">
             WORKSHOP FULL
           </span>
         )}
@@ -48,7 +72,7 @@ export default function RegistrationForm({ workshopId, isFull }: { workshopId: n
           
           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-brand-text">
                 Attendee Name
               </label>
               <div className="mt-1">
@@ -57,14 +81,13 @@ export default function RegistrationForm({ workshopId, isFull }: { workshopId: n
                   id="name" 
                   name="name" 
                   required 
-                  disabled={isFull}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500" 
+                  className="appearance-none block w-full px-3 py-2 border border-brand-border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100 disabled:text-gray-500 bg-brand-surface" 
                 />
               </div>
             </div>
             
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-brand-text">
                 Attendee Email
               </label>
               <div className="mt-1">
@@ -73,8 +96,7 @@ export default function RegistrationForm({ workshopId, isFull }: { workshopId: n
                   id="email" 
                   name="email" 
                   required 
-                  disabled={isFull}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500" 
+                  className="appearance-none block w-full px-3 py-2 border border-brand-border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100 disabled:text-gray-500 bg-brand-surface" 
                 />
               </div>
             </div>
@@ -83,10 +105,10 @@ export default function RegistrationForm({ workshopId, isFull }: { workshopId: n
           <div className="pt-2">
             <button 
               type="submit" 
-              disabled={isPending || isFull}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={isPending}
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isPending ? 'Processing...' : 'Confirm Registration'}
+              {isPending ? 'Processing...' : isFull ? 'Join Waitlist' : 'Confirm Registration'}
             </button>
           </div>
         </form>
