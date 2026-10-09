@@ -41,10 +41,10 @@ export async function loginUser(prevState: any, formData: FormData) {
     return { error: "An unexpected error occurred." };
   }
 
-  const res = await query('SELECT role FROM users WHERE email = $1', [email]);
-  if (res.rows[0].role === 'admin') {
-    redirect("/admin");
+  const roleRes = await query('SELECT role FROM users WHERE email = $1', [email]);
+  if (roleRes.rows[0].role === 'admin') {
+    return { success: true, redirectUrl: "/admin" };
   } else {
-    redirect("/");
+    return { success: true, redirectUrl: "/" };
   }
 }
