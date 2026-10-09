@@ -8,13 +8,12 @@ export type SessionPayload = {
 };
 
 export async function encrypt(payload: SessionPayload): Promise<string> {
-  return Buffer.from(JSON.stringify(payload)).toString('base64');
+  return JSON.stringify(payload);
 }
 
 export async function decrypt(cookieValue: string): Promise<SessionPayload | null> {
   try {
-    const jsonStr = Buffer.from(cookieValue, 'base64').toString('utf-8');
-    return JSON.parse(jsonStr) as SessionPayload;
+    return JSON.parse(cookieValue) as SessionPayload;
   } catch (error) {
     return null;
   }
